@@ -1,4 +1,4 @@
-"""Gnerator wykresów i diagramów
+"""Generator wykresów i diagramów
 Autor: Piotr Frydman
 """
 from tkinter import *
@@ -10,27 +10,61 @@ import os
 data_type = []
 
 def read_file():
-    file = str(e1.get())
-  
-    with open(file) as f:
-        reader = csv.reader(f, delimiter=";")
-        data_type = next(reader)
-    f.close()
+    try:
+        file = str(e1.get())
+        if file != "": 
+            with open(file) as f:
+                reader = csv.reader(f, delimiter=";")
+                data_type = next(reader)
+            f.close()
+            le.config(text="")
 
-    create_chart(data_type, file)
+            #przekazuje nazwy kolumn i pliku
+            create_chart(data_type, file)
+            
+        else:
+            le.config(text="Proszę podać nazwę pliku")
+            
+    except FileNotFoundError:
+        le.config(text="Plik o tej nazwie nie istnieje")
     
 def create_chart(dtype, filename):
     top = Toplevel()
-    top.geometry("200x70")
+    top.geometry("200x100")
     top.title("Tworzenie wykresu")
 
-    def select():
+    chtype = ["kolumnowy", "liniowy"]
+    
+    def configure_chart():
         #wybór danych
         select_data = data.get()
-        i = dtype.index(select_data)
-        draw_graph(i)
+            
+        #wybór typu wykresu
+        chart_type = chart.get()
 
-    def draw_graph(j):
+        if select_data not in dtype or chart_type not in chtype:
+            laberr.config(text="Proszę wybrać opcje z list")
+        else:
+            datind = dtype.index(select_data)
+            graph = chtype.index(chart_type)
+            laberr.config(text="")
+            draw_graph(datind, graph)
+                                                 
+    data = ttk.Combobox(top, values=dtype, state="readonly")
+    data.grid(row = 0, column = 0)
+    data.set("Wybierz typ danych")
+        
+    chart = ttk.Combobox(top, values=chtype, state="readonly")
+    chart.grid(row = 1, column = 0)
+    chart.set("Wybierz typ wykresu")
+
+    b = Button(top, text="Utwórz", command=configure_chart)
+    b.grid(row=0,column=1)
+
+    laberr = Label(top, text = "")
+    laberr.grid(row=2,column=0)
+    
+    def draw_graph(dati,chai):
         read_data = []
         rd = []
         with open(filename) as f:
@@ -38,8 +72,8 @@ def create_chart(dtype, filename):
             data_row = next(reader)
                     
             for row in reader:
-                ree = float(row[j])
-                rd.append(ree)
+                csv_row = float(row[dati])
+                rd.append(csv_row)
                 read_data = tuple(rd)
         f.close()
         
@@ -51,30 +85,33 @@ def create_chart(dtype, filename):
             numbers.append(i+1)
             temp.append(str(numbers[i]))
             labels = (tuple(temp))
-                
-        plt.bar(labels, read_data)
+
+        #tworzenie wykresu
+        if chai == 0:
+            plt.bar(labels, read_data)
+        if chai == 1:
+            plt.plot(labels, read_data)
+            
         plt.xlabel("Oś X")
         plt.ylabel("Oś Y")
         plt.title("Tytuł wykresu")              
         plt.show()
-        
-    data = ttk.Combobox(top, values=dtype, state="readonly")
-    data.grid(row = 0, column = 0)
-    data.set("Wybierz typ danych")
-    
-    b = Button(top, text="Utwórz", command=select)
-    b.grid(row=0,column=1)
-    
+            
 root = Tk()
 root.title("Generator wykresów")
 root.geometry('360x100')
 
-l1 = Label(root, text = "Podaj nazwę pliku")
+l1 = Label(root, text = "Podaj nazwę pliku", pady=8)
 l1.grid(row=0,column=0)
-e1= Entry(root, bd =3, width=25)
+
+e1= Entry(root, bd=3, width=25)
 e1.grid(row=1,column=0)
+
 b = Button(root, text="OK", command=read_file)
 b.grid(row=1,column=1)
+
+le = Label(root, text = "", pady=6)
+le.grid(row=2,column=0)
 
 root.mainloop()
 
