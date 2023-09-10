@@ -11,7 +11,7 @@ data_type = []
 
 def read_file():
     try:
-        file = str(e1.get())
+        file = e1.get()
         if file != "": 
             with open(file) as f:
                 reader = csv.reader(f, delimiter=";")
@@ -30,8 +30,10 @@ def read_file():
     
 def create_chart(dtype, filename):
     top = Toplevel()
-    top.geometry("200x100")
+    top.geometry("400x200")
     top.title("Tworzenie wykresu")
+    top.grab_set()
+    top.focus()
 
     chtype = ["kolumnowy", "liniowy"]
     
@@ -42,13 +44,17 @@ def create_chart(dtype, filename):
         #wybór typu wykresu
         chart_type = chart.get()
 
+        x = osX.get()
+        y = osY.get()
+        chtitle = title.get()
+        
         if select_data not in dtype or chart_type not in chtype:
             laberr.config(text="Proszę wybrać opcje z list")
         else:
             datind = dtype.index(select_data)
             graph = chtype.index(chart_type)
             laberr.config(text="")
-            draw_graph(datind, graph)
+            draw_graph(datind, graph,chtitle, x,y)
                                                  
     data = ttk.Combobox(top, values=dtype, state="readonly")
     data.grid(row = 0, column = 0)
@@ -58,13 +64,31 @@ def create_chart(dtype, filename):
     chart.grid(row = 1, column = 0)
     chart.set("Wybierz typ wykresu")
 
+    #tytuł wykresu
+    ltitle=Label(top, text="Tytuł wykresu")
+    ltitle.grid(row=3,column=0)
+    title= Entry(top,bd=3, width=25)
+    title.grid(row=3,column=1)
+
+    #oznaczenie osi X
+    loX=Label(top, text="Nazwa osi X")
+    loX.grid(row=4,column=0)
+    osX= Entry(top,bd=3, width=25)
+    osX.grid(row=4,column=1)
+    
+    #oznaczenie osi Y
+    loY=Label(top, text="Nazwa osi Y")
+    loY.grid(row=5,column=0)
+    osY= Entry(top,bd=3,width=25)
+    osY.grid(row=5,column=1)
+    
     b = Button(top, text="Utwórz", command=configure_chart)
     b.grid(row=0,column=1)
 
     laberr = Label(top, text = "")
-    laberr.grid(row=2,column=0)
+    laberr.grid(row=6,column=0)
     
-    def draw_graph(dati,chai):
+    def draw_graph(dati,chai,title, osx,osy):
         read_data = []
         rd = []
         with open(filename) as f:
@@ -91,10 +115,10 @@ def create_chart(dtype, filename):
             plt.bar(labels, read_data)
         if chai == 1:
             plt.plot(labels, read_data)
-            
-        plt.xlabel("Oś X")
-        plt.ylabel("Oś Y")
-        plt.title("Tytuł wykresu")              
+
+        plt.title(title) 
+        plt.xlabel(osx)
+        plt.ylabel(osy)              
         plt.show()
             
 root = Tk()
