@@ -10,23 +10,30 @@ import os
 data_type = []
 
 def read_file():
-    try:
-        file = e1.get()
-        if file != "": 
-            with open(file) as f:
-                reader = csv.reader(f, delimiter=";")
-                data_type = next(reader)
-            f.close()
-            le.config(text="")
+    file = e1.get()
+    if file != "":
+        #wyszukuje plik w katalogach
+        for root, dirs, files in os.walk(".", topdown=False):
+            for name in files:
+                if name == file:
+                    os.chdir(root)
+                    
+                    with open(file) as f:
+                        reader = csv.reader(f, delimiter=";")
+                        data_type = next(reader)
+                    f.close()
+                    le.config(text="")
 
-            #przekazuje nazwy kolumn i pliku
-            create_chart(data_type, file)
+                    #przekazuje nazwy kolumn i pliku
+                    create_chart(data_type, file)
+
+                else:
+                    le.config(text="Plik nie istnieje")
             
-        else:
-            le.config(text="Proszę podać nazwę pliku")
+    else:
+        le.config(text="Proszę podać nazwę pliku")
             
-    except FileNotFoundError:
-        le.config(text="Plik nie istnieje")
+    
     
 def create_chart(dtype, filename):
     top = Toplevel()
@@ -35,6 +42,13 @@ def create_chart(dtype, filename):
     top.grab_set()
     top.focus()
 
+    top.columnconfigure(0,weight=3)
+    top.columnconfigure(1,weight=3)
+    top.columnconfigure(2,weight=2)
+
+    top.rowconfigure(0,weight=2)
+    top.rowconfigure(1,weight=2)
+    
     chtype = ["kolumnowy", "liniowy"]
     
     def configure_chart():
@@ -67,13 +81,17 @@ def create_chart(dtype, filename):
             chart_config['typeInd'] = chtype.index(chart_type.get())
             laberr.config(text="")
             draw_graph(chart_config)
-                                                 
+
+    ldata=Label(top, text="Typ danych")
+    ldata.grid(row=0,column=0)
     data = ttk.Combobox(top, values=dtype, state="readonly")
-    data.grid(row = 0, column = 0)
+    data.grid(row = 0, column = 1)
     data.set("Wybierz typ danych")
-        
+
+    lchart=Label(top, text="Typ wykresu")
+    lchart.grid(row=1,column=0)    
     chart_type = ttk.Combobox(top, values=chtype, state="readonly")
-    chart_type.grid(row = 1, column = 0)
+    chart_type.grid(row = 1, column = 1)
     chart_type.set("Wybierz typ wykresu")
 
     #tytuł wykresu
@@ -90,9 +108,9 @@ def create_chart(dtype, filename):
     loY=Label(top, text="Nazwa osi Y").grid(row=5,column=0)
     osY= Entry(top,bd=3,width=25)
     osY.grid(row=5,column=1)
-    
+
     b = Button(top, text="Utwórz", command=configure_chart)
-    b.grid(row=0,column=1)
+    b.grid(row=7,column=3)
 
     laberr = Label(top, text = "")
     laberr.grid(row=6,column=0)
@@ -119,10 +137,13 @@ def create_chart(dtype, filename):
 
         #tworzenie wykresu
         if chartOpt['typeInd'] == 0:
-            plt.bar(labels, read_data)
+            fig,ax=plt.subplots(figsize=(6,6))
+            ax.bar(labels, read_data)
+            
         if chartOpt['typeInd'] == 1:
             plt.plot(labels, read_data)
 
+                
         plt.title(chartOpt['title']) 
         plt.xlabel(chartOpt['labelx'])
         plt.ylabel(chartOpt['labely'])              
@@ -130,13 +151,25 @@ def create_chart(dtype, filename):
             
 root = Tk()
 root.title("Generator wykresów")
-root.geometry('240x100')
+root.geometry('300x100')
 
-l1 = Label(root, text = "Podaj nazwę pliku").grid(row=0,column=0)
+
+root.columnconfigure(0,weight=6)
+root.columnconfigure(1,weight=3)
+
+root.rowconfigure(0,weight=2)
+root.rowconfigure(1,weight=2)
+
+
+l1 = Label(root, text = "Podaj nazwę pliku")
+l1.grid(row=0,column=0)
 
 e1= Entry(root, bd=3)
 e1.grid(row=1,column=0)
-confirm = Button(root, text="OK", command=read_file).grid(row=1,column=1)
+
+confirm = Button(root, text="Otwórz", command=read_file)
+confirm.grid(row=1,column=1)
+
 le = Label(root, text = "")
 le.grid(row=2,column=0)
 
