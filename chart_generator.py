@@ -7,33 +7,26 @@ import matplotlib.pyplot as plt
 import csv
 import os
 
-data_type = []
-
-def read_file():
-    file = e1.get()
-    if file != "":
-        #wyszukuje plik w katalogach
-        for root, dirs, files in os.walk(".", topdown=False):
-            for name in files:
-                if name == file:
-                    os.chdir(root)
-                    
-                    with open(file) as f:
-                        reader = csv.reader(f, delimiter=";")
-                        data_type = next(reader)
-                    f.close()
-                    le.config(text="")
-
-                    #przekazuje nazwy kolumn i pliku
-                    create_chart(data_type, file)
-
-                else:
-                    le.config(text="Plik nie istnieje")
+def search_file():
+    file = fname.get()
+    #wyszukuje plik w katalogach
+    for root, dirs, files in os.walk(".", topdown=False):
+        for name in files:
+            if name == file:
+                os.chdir(root)
+                read_file(file)
+                le.config(text="")
+            else:
+                le.config(text="Plik nie istnieje")
             
-    else:
-        le.config(text="Proszę podać nazwę pliku")
-            
+def read_file(file):
+    with open(file) as f:
+        reader = csv.reader(f, delimiter=";")
+        col_names = next(reader)
+    f.close()
     
+    #przekazuje nazwy kolumn i pliku
+    create_chart(col_names, file)    
     
 def create_chart(dtype, filename):
     top = Toplevel()
@@ -109,11 +102,12 @@ def create_chart(dtype, filename):
     osY= Entry(top,bd=3,width=25)
     osY.grid(row=5,column=1)
 
+    #komunikat błędów
+    laberr = Label(top, text = "")
+    laberr.grid(row=6,column=1)
+    
     b = Button(top, text="Utwórz", command=configure_chart)
     b.grid(row=7,column=3)
-
-    laberr = Label(top, text = "")
-    laberr.grid(row=6,column=0)
     
     def draw_graph(chartOpt):
         read_data = []
@@ -153,22 +147,22 @@ root = Tk()
 root.title("Generator wykresów")
 root.geometry('300x100')
 
-
-root.columnconfigure(0,weight=6)
-root.columnconfigure(1,weight=3)
+#położenie elementów w oknie
+root.columnconfigure(0,weight=8)
+root.columnconfigure(1,weight=1)
+root.columnconfigure(2,weight=3)
 
 root.rowconfigure(0,weight=2)
 root.rowconfigure(1,weight=2)
 
-
 l1 = Label(root, text = "Podaj nazwę pliku")
 l1.grid(row=0,column=0)
 
-e1= Entry(root, bd=3)
-e1.grid(row=1,column=0)
+fname = Entry(root, bd=3)
+fname.grid(row=1,column=0)
 
-confirm = Button(root, text="Otwórz", command=read_file)
-confirm.grid(row=1,column=1)
+confirm = Button(root, text="Otwórz", command=search_file)
+confirm.grid(row=1,column=2)
 
 le = Label(root, text = "")
 le.grid(row=2,column=0)
