@@ -141,22 +141,18 @@ class App(tk.Tk):
 
     def draw_graph(self, chartOpt, filename):
         read_data = []
+        labels = []
         with open(filename) as f:
             reader = csv.reader(f, delimiter=";")
             data_row = next(reader)
-            
-            for row in reader:
-                csv_row = float(row[chartOpt['datInd']])
-                read_data.append(csv_row)
-            f.close()
 
-            numbers = []
-            temp = []
-            # Tworzenie domyślnych etykiet danych na osi X
-            for i in range(len(read_data)):
-                numbers.append(i + 1)
-                temp.append(str(numbers[i]))
-                labels = (tuple(temp))
+            #pobranie danych
+            for row in reader:
+                csv_row = row[chartOpt['datInd']]
+                read_data.append(float(csv_row))
+                names = row[0]
+                labels.append(names)
+            f.close()
 
             # Tworzenie wykresu
             if chartOpt['typeInd'] == 0:
