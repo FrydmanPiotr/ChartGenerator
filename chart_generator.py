@@ -1,9 +1,10 @@
-"""Generator wykresów i diagramów
+"""
+Generator wykresów i diagramów
 Autor: Piotr Frydman
 """
 import tkinter as tk
+from tkinter import Toplevel, messagebox
 from tkinter import ttk
-from tkinter import Toplevel
 import matplotlib.pyplot as plt
 import csv
 import os
@@ -17,48 +18,46 @@ class App(tk.Tk):
         self.columnconfigure(0, weight=3)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=2)
-
         self.rowconfigure(0, weight=3)
         self.rowconfigure(1, weight=3)
+        self.create_widgets()
 
-        self.fname = tk.Entry(self, bd=2)
-        self.fname.grid(row=1, column=0)
-
+    def create_widgets(self):
+        self.name = tk.Label(self, text="Podaj nazwę pliku")
+        self.name.grid(row=0, column=0)
+        self.filename = tk.Entry(self, bd=2)
+        self.filename.grid(row=1, column=0)
         self.search = tk.Button(self, text="Szukaj", command=self.search_file)
         self.search.grid(row=1, column=2)
-
-        self.l1 = tk.Label(self, text="Podaj nazwę pliku")
-        self.l1.grid(row=0, column=0)
-
-        self.lexp = tk.Label(self, text=".csv")
-        self.lexp.grid(row=1, column=1)
-
-        self.le = tk.Label(self, text="")
-        self.le.grid(row=2, column=0)
-
+        self.extension = tk.Label(self, text=".csv")
+        self.extension.grid(row=1, column=1)
+    
     def search_file(self):
-        self.file = self.fname.get()
+        self.file = self.filename.get()
         self.file += ".csv"
-
-        # Wyszukuje plik w katalogach
+        is_found = False
+        
+        #wyszukuje plik w katalogach
         for root, dirs, files in os.walk(".", topdown=False):
             for name in files:
                 if name == self.file:
                     os.chdir(root)
                     self.read_file(self.file)
-                    self.le.config(text="")
+                    is_found = True
                 else:
-                    self.le.config(text="Plik nie istnieje")
-
+                    self.filename.delete(0,'end')
+        if is_found == False:
+            messagebox.showerror("Błąd", "Plik nie istnieje")
+                
     def read_file(self, filename):
         with open(filename) as file:
             reader = csv.reader(file, delimiter=";")
-            col_names = next(reader)
+            columns_names = next(reader)
 
-        # Przekazuje nazwy kolumn i pliku
-        self.create_chart(col_names, filename)
+        #przekazuje nazwy kolumn i pliku
+        self.create_chart(columns_names, filename)
 
-    def create_chart(self, col_names, filename):
+    def create_chart(self, columns_names, filename):
         top = Toplevel()
         top.geometry("400x200")
         top.title("Tworzenie wykresu")
@@ -71,16 +70,12 @@ class App(tk.Tk):
 
         top.rowconfigure(0, weight=2)
         top.rowconfigure(1, weight=2)          
-
-        # Komunikat błędów
-        self.laberr = tk.Label(top, text="")
-        self.laberr.grid(row=6, column=1)
-        
+       
         chtype = ["kolumnowy", "liniowy"]
 
         def configure_chart():
-            # Przechowuje dane pobrane od użytkownika
-            chart_config = {
+            #przechowuje dane pobrane od użytkownika
+            options = {
                 'data': '',
                 'type': '',
                 'labelx': '',
@@ -90,48 +85,44 @@ class App(tk.Tk):
                 'typeInd': 0
             }
 
-            # Wybór danych
-            chart_config['data'] = data.get()
+            #wybór danych
+            options['data'] = data.get()
+            #wybór typu wykresu
+            options['type'] = chart_type.get()
 
-            # Wybór typu wykresu
-            chart_config['type'] = chart_type.get()
+            options['labelx'] = osX.get()
+            options['labely'] = osY.get()
+            options['title'] = title.get()
 
-            chart_config['labelx'] = osX.get()
-            chart_config['labely'] = osY.get()
-            chart_config['title'] = title.get()
-
-            if chart_config['data'] not in col_names or chart_config['type'] not in chtype:
-                    self.laberr.config(text="Proszę wybrać opcje z list")
+            if options['data'] not in columns_names or options['type'] not in chtype:
+                    messagebox.showerror("Błąd", "Wybierz opcje z list")
 
             else:
-                chart_config['datInd'] = col_names.index(data.get())
-                chart_config['typeInd'] = chtype.index(chart_type.get())
-                self.laberr.config(text="")
-                self.draw_graph(chart_config, filename)
+                options['datInd'] = columns_names.index(data.get())
+                options['typeInd'] = chtype.index(chart_type.get())
+                self.draw_graph(options, filename)
 
-        ldata = tk.Label(top, text="Typ danych")
-        ldata.grid(row=0, column=0)
-        data = ttk.Combobox(top, values=col_names[1:], state="readonly")
+        ldata = tk.Label(top, text="Typ danych").grid(row=0, column=0)
+        data = ttk.Combobox(top, values=columns_names[1:], state="readonly")
         data.grid(row=0, column=1)
         data.set("Wybierz typ danych")
 
-        lchart = tk.Label(top, text="Typ wykresu")
-        lchart.grid(row=1, column=0)
+        lchart = tk.Label(top, text="Typ wykresu").grid(row=1, column=0)
         chart_type = ttk.Combobox(top, values=chtype, state="readonly")
         chart_type.grid(row=1, column=1)
         chart_type.set("Wybierz typ wykresu")
 
-        # Tytuł wykresu
+        #tytuł wykresu
         ltitle = tk.Label(top, text="Tytuł wykresu").grid(row=3, column=0)
         title = tk.Entry(top, bd=3, width=25)
         title.grid(row=3, column=1)
 
-        # Oznaczenie osi X
+        #oznaczenie osi X
         loX = tk.Label(top, text="Nazwa osi X").grid(row=4, column=0)
         osX = tk.Entry(top, bd=3, width=25)
         osX.grid(row=4, column=1)
 
-        # Oznaczenie osi Y
+        #oznaczenie osi Y
         loY = tk.Label(top, text="Nazwa osi Y").grid(row=5, column=0)
         osY = tk.Entry(top, bd=3, width=25)
         osY.grid(row=5, column=1)
@@ -139,7 +130,7 @@ class App(tk.Tk):
         b = tk.Button(top, text="Utwórz", command=configure_chart)
         b.grid(row=7, column=3)
 
-    def draw_graph(self, chartOpt, filename):
+    def draw_graph(self, options, filename):
         read_data = []
         labels = []
         with open(filename) as f:
@@ -148,23 +139,22 @@ class App(tk.Tk):
 
             #pobranie danych
             for row in reader:
-                csv_row = row[chartOpt['datInd']]
+                csv_row = row[options['datInd']]
                 read_data.append(float(csv_row))
                 names = row[0]
                 labels.append(names)
-            f.close()
 
-            # Tworzenie wykresu
-            if chartOpt['typeInd'] == 0:
+            #tworzenie wykresu
+            if options['typeInd'] == 0:
                 fig, ax = plt.subplots(figsize=(6, 6))
                 ax.bar(labels, read_data)
 
-            if chartOpt['typeInd'] == 1:
+            if options['typeInd'] == 1:
                 plt.plot(labels, read_data)
 
-            plt.title(chartOpt['title'])
-            plt.xlabel(chartOpt['labelx'])
-            plt.ylabel(chartOpt['labely'])
+            plt.title(options['title'])
+            plt.xlabel(options['labelx'])
+            plt.ylabel(options['labely'])
             plt.show()          
 
 app = App()
