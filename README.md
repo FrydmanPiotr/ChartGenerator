@@ -1,4 +1,4 @@
-# Generator-wykresow
+# chart_generator
 Program generujący wykres na podstawie danych z arkusza kalkulacyjnego
 
 Opis
