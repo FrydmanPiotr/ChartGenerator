@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import csv
 import os
 
-class App(tk.Tk):
+class ChartGenerator(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Generator wykresów")
@@ -33,9 +33,8 @@ class App(tk.Tk):
         self.extension.grid(row=1, column=1)
     
     def search_file(self):
-        self.file = self.filename.get()
-        self.file += ".csv"
-        is_found = False
+        self.file = self.filename.get() + ".csv"
+        file_found = False
         
         #wyszukuje plik w katalogach
         for root, dirs, files in os.walk(".", topdown=False):
@@ -43,16 +42,18 @@ class App(tk.Tk):
                 if name == self.file:
                     os.chdir(root)
                     self.read_file(self.file)
-                    is_found = True
+                    file_found = True
                 else:
                     self.filename.delete(0,'end')
-        if is_found == False:
+                    
+        if not file_found:
             messagebox.showerror("Błąd", "Plik nie istnieje")
                 
     def read_file(self, filename):
         with open(filename) as file:
             reader = csv.reader(file, delimiter=";")
             columns_names = next(reader)
+        file.close()
 
         #przekazuje nazwy kolumn i pliku
         self.create_chart(columns_names, filename)
@@ -76,24 +77,15 @@ class App(tk.Tk):
         def configure_chart():
             #przechowuje dane pobrane od użytkownika
             options = {
-                'data': '',
-                'type': '',
-                'labelx': '',
-                'labely': '',
-                'title': '',
+                'data': data.get(),
+                'type': chart_type.get(),
+                'labelx': osX.get(),
+                'labely': osY.get(),
+                'title': title.get(),
                 'datInd': 0,
                 'typeInd': 0
             }
-
-            #wybór danych
-            options['data'] = data.get()
-            #wybór typu wykresu
-            options['type'] = chart_type.get()
-
-            options['labelx'] = osX.get()
-            options['labely'] = osY.get()
-            options['title'] = title.get()
-
+            
             if options['data'] not in columns_names or options['type'] not in chtype:
                     messagebox.showerror("Błąd", "Wybierz opcje z list")
 
@@ -133,10 +125,10 @@ class App(tk.Tk):
     def draw_graph(self, options, filename):
         read_data = []
         labels = []
-        with open(filename) as f:
-            reader = csv.reader(f, delimiter=";")
+        with open(filename) as file:
+            reader = csv.reader(file, delimiter=";")
             data_row = next(reader)
-
+                
             #pobranie danych
             for row in reader:
                 csv_row = row[options['datInd']]
@@ -151,11 +143,12 @@ class App(tk.Tk):
 
             if options['typeInd'] == 1:
                 plt.plot(labels, read_data)
-
+            file.close()
+            
             plt.title(options['title'])
             plt.xlabel(options['labelx'])
             plt.ylabel(options['labely'])
             plt.show()          
-
-app = App()
+        
+app = ChartGenerator()
 app.mainloop()
