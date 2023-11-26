@@ -13,7 +13,9 @@ class ChartGenerator(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Generator wykresów")
-        self.geometry("300x100")
+        self.geometry("300x100+500+250")
+        self.resizable(False, False)
+        
         #położenie elementów w oknie
         self.columnconfigure(0, weight=3)
         self.columnconfigure(1, weight=1)
