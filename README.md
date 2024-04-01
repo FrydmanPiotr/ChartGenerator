@@ -1,15 +1,21 @@
-# ChartGenerator
-Program generujący wykres na podstawie danych z arkusza kalkulacyjnego
+## ChartGenerator
+A program that generates a chart based on data from a spreadsheet
 
-Opis
-=====================================================================   
-Aplikacja została napisana w języku Python. Posiada interfejs graficzny użytkownika (GUI)
-utworzony przy pomocy biblioteki standardowej Pythona - Tkinter. W projekcie zostały wykorzystane
-również inne bibilioteki wbudowane języka Python, m.in. matplotlib (tworzenie wykresów), os (do 
-wyszukiwania pliku w systemie) oraz csv (odczyt plików). Program za pośrednictwem okna pobiera 
-nazwę pliku arkusza kalkulacyjnego w formacie .ods lub .csv.
+## Table of contents
+* Description
+* Technologies
 
-Jeżeli plik zostanie znaleziony zostaje wyświetlone nowe okno umożliwiające konfigurację
-parametrów wykresu do potrzeb użytkownika. Po dokonaniu wyboru preferowanych opcji i wciśnięciu
-przycisku "Utwórz" zostaje wyświetlony diagram.
+## Description
+The application was written in Python. Has a graphical user interface (GUI)
+created using the Python standard library - Tkinter. They were used in the project
+also other Python built-in libraries, including: matplotlib (plot creation), os (do
+searching for a file in the system) and csv (reading files). The program downloads through the window
+the name of the spreadsheet file in .ods or .csv format.
 
+## Description 
+The program sends a request to the API and receives a response. 
+User can export the data from the database to a CSV file. 
+
+## Technologies 
+Project is created with:
+* Python 3.11
