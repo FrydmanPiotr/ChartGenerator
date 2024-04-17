@@ -3,8 +3,7 @@ Project: Chart and diagram generator
 Author: Piotr Frydman
 """
 import tkinter as tk
-from tkinter import Toplevel, messagebox
-from tkinter import ttk
+from tkinter import ttk, Toplevel, messagebox
 import matplotlib.pyplot as plt
 import csv
 import os
